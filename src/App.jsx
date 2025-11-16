@@ -1,26 +1,48 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
+import Hero from './components/Hero'
+import EventPicker from './components/EventPicker'
+import QuickCreateEvent from './components/QuickCreateEvent'
+import SeatMap from './components/SeatMap'
 
 function App() {
-  const [count, setCount] = useState(0)
+  const [selectedEvent, setSelectedEvent] = useState(null)
+  const [lastAction, setLastAction] = useState(null)
+
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: 'smooth' })
+  }, [selectedEvent])
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-50 to-blue-50 flex items-center justify-center">
-      <div className="bg-white p-8 rounded-lg shadow-lg">
-        <h1 className="text-3xl font-bold text-gray-800 mb-4">
-          Vibe Coding Platform
-        </h1>
-        <p className="text-gray-600 mb-6">
-          Your AI-powered development environment
-        </p>
-        <div className="text-center">
-          <button
-            onClick={() => setCount(count + 1)}
-            className="bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 px-4 rounded"
-          >
-            Count is {count}
-          </button>
+    <div className="min-h-screen bg-gradient-to-b from-black via-slate-900 to-black">
+      <Hero />
+
+      <main className="mx-auto max-w-6xl px-6 py-12">
+        <div className="mb-8 flex items-center justify-between text-white/80">
+          <h2 className="text-2xl font-bold">Pick an event and choose your seats</h2>
+          {lastAction && <div className="text-sm text-emerald-300">{lastAction}</div>}
         </div>
-      </div>
+
+        {!selectedEvent && (
+          <div className="space-y-6">
+            <EventPicker onSelect={setSelectedEvent} />
+            <QuickCreateEvent onCreated={() => { setSelectedEvent(null); setLastAction('Event created. Select it to continue.') }} />
+          </div>
+        )}
+
+        {selectedEvent && (
+          <div className="space-y-6 text-white">
+            <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
+              <div>
+                <div className="text-white/60 text-sm">{new Date(selectedEvent.date).toLocaleString()} • {selectedEvent.venue}</div>
+                <h3 className="text-2xl font-semibold">{selectedEvent.title}</h3>
+              </div>
+              <button onClick={() => setSelectedEvent(null)} className="rounded-md border border-white/10 bg-white/5 px-4 py-2 text-sm">Change event</button>
+            </div>
+
+            <SeatMap event={selectedEvent} onBooked={() => setLastAction('Booking confirmed!')} />
+          </div>
+        )}
+      </main>
     </div>
   )
 }
